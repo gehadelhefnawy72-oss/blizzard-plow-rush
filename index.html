@@ -13,7 +13,7 @@ canvas#c{position:fixed;inset:0;display:block}
 #hud *{pointer-events:none}
 #hud button,#hud #joyzone{pointer-events:auto}
 .chip{background:var(--glass);border:2px solid rgba(214,236,255,.25);border-radius:14px;padding:6px 12px;backdrop-filter:blur(4px)}
-#tl{position:absolute;left:8px;top:8px;display:flex;flex-direction:column;gap:5px;width:min(210px,46vw)}
+#tl{position:absolute;left:max(8px,env(safe-area-inset-left));top:8px;display:flex;flex-direction:column;gap:5px;width:min(210px,46vw)}
 #money{width:fit-content}
 #money{font:900 24px Impact,'Arial Black',sans-serif;color:var(--yl);letter-spacing:.5px;display:flex;gap:6px;align-items:center;transition:transform .12s}
 #money.pop{transform:scale(1.12)}
@@ -46,9 +46,9 @@ canvas#c{position:fixed;inset:0;display:block}
 #joyzone{position:absolute;left:0;top:14%;width:55%;bottom:0}
 #jbase{position:absolute;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:3px solid rgba(214,236,255,.45);background:rgba(214,236,255,.1);display:none}
 #jknob{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:radial-gradient(#fff,#9ccfff);box-shadow:0 0 14px #56d8ff}
-#bNitro{position:absolute;right:16px;bottom:16px;width:96px;height:96px;border-radius:50%;border:4px solid #bfe9ff;background:radial-gradient(circle at 35% 30%,#7fe8ff,#1c6bff 70%);color:#fff;font:900 17px Impact,'Arial Black',sans-serif;box-shadow:0 0 22px #3aa9ff;touch-action:none}
+#bNitro{position:absolute;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));width:96px;height:96px;border-radius:50%;border:4px solid #bfe9ff;background:radial-gradient(circle at 35% 30%,#7fe8ff,#1c6bff 70%);color:#fff;font:900 17px Impact,'Arial Black',sans-serif;box-shadow:0 0 22px #3aa9ff;touch-action:none}
 #bNitro.on{filter:brightness(1.5);transform:scale(.94)}
-#bFreeze{position:absolute;right:26px;bottom:128px;width:66px;height:66px;border-radius:50%;border:3px solid #e6f7ff;background:radial-gradient(circle at 35% 30%,#fff,#7fc8ff 75%);color:#073a66;font:900 24px inherit;display:none;touch-action:none}
+#bFreeze{position:absolute;right:max(26px,calc(env(safe-area-inset-right) + 10px));bottom:128px;width:66px;height:66px;border-radius:50%;border:3px solid #e6f7ff;background:radial-gradient(circle at 35% 30%,#fff,#7fc8ff 75%);color:#073a66;font:900 24px inherit;display:none;touch-action:none}
 #bFreeze:disabled{filter:grayscale(.8) brightness(.6)}
 #bFreeze small{display:block;font-size:10px;line-height:10px}
 .modal{position:fixed;inset:0;background:rgba(4,10,20,.78);display:none;align-items:center;justify-content:center;z-index:5;padding:10px;touch-action:pan-y}
@@ -81,6 +81,7 @@ canvas#c{position:fixed;inset:0;display:block}
 .row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
 @media (max-width:640px){#tr{right:6px;top:8px;gap:4px}#tr button{min-width:36px;height:36px;padding:0 6px;font-size:15px;border-radius:11px}#money{font-size:20px;padding:4px 10px}#cityname{font-size:11px;padding:4px 9px}#bNitro{width:76px;height:76px;right:12px;bottom:14px;font-size:14px}#bFreeze{right:21px;bottom:100px;width:54px;height:54px}}
 @media (max-height:520px){#bNitro{width:80px;height:80px;bottom:10px}#bFreeze{bottom:100px;width:56px;height:56px}#bars{bottom:6px}.panel{padding:10px 14px}}
+@media (orientation:landscape) and (max-height:520px){#joyzone{top:10%;width:46%}#tl{width:min(230px,30vw)}.panel{max-height:92vh;overflow:auto}}
 #tr button{position:relative}
 #bossbox{display:none;width:fit-content;font:900 14px Impact,'Arial Black',sans-serif;color:#ffd6d6;border-color:rgba(255,90,90,.65);background:rgba(70,8,18,.82)}
 #bossbox.warn{animation:fl .4s infinite alternate;color:#fff}
@@ -188,9 +189,11 @@ const fmt=n=>{n=Math.floor(n);if(n>=1e9)return(n/1e9).toFixed(2)+'B';if(n>=1e6)r
 const rr=(g,x,y,w,h,r)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()};
 
 /* ================= world constants ================= */
-const WW=1800,WH=1200,CS=12,GX=WW/CS,GY=WH/CS,TS=252;
-const isRoad=(x,y)=>x>=0&&y>=0&&x<WW&&y<WH&&((x%600)<190||(y%400)<190);
-const BLK=[];for(let j=0;j<3;j++)for(let i=0;i<3;i++)BLK.push({x:i*600+190,y:j*400+190,w:410,h:210});
+const CS=12,TS=252;let WW=1800,WH=1200,GX=150,GY=100,MC=3,MR=3,PX=600,PY=400,RW=190,HUE=0;
+/* city map grows every 5 cities: 3x3 blocks -> 4x3 -> 4x4 -> 5x4 -> 5x5 -> 6x5 (max); street spacing/width differ per city */
+const mapDims=i=>{const t=Math.floor(i/5);return[Math.min(6,3+Math.ceil(t/2)),Math.min(5,3+Math.floor(t/2))]};
+const isRoad=(x,y)=>x>=0&&y>=0&&x<WW&&y<WH&&((x%PX)<RW||(y%PY)<RW);
+let BLK=[];
 const MEL={x:695,y:495,r:104};
 
 /* ================= data ================= */
@@ -278,10 +281,10 @@ const UP=[
  {id:'helper',ic:'🚜',base:400,g:1.7},{id:'value',ic:'💲',base:120,g:1.6},{id:'freeze',ic:'❄️',base:250,g:1.6},{id:'gold',ic:'💎',base:200,g:1.6}];
 const MAXL=20; /* max upgrade level (was 10) */
 const I18={
-en:{shop:'Upgrades',cities:'Cities',cleared:'Cleared',tank:'Tank',nitro:'Nitro',max:'MAX',next:'Next city',close:'✕',combo:'RESCUE COMBO',bliz:'BLIZZARD INCOMING!',chest:'GOLDEN CHEST DROPPED!',chestOn:'GOLD MODE',done:'CITY CLEARED!',bonus:'Clear bonus',locked:'Locked',tankFull:'TANK FULL — unload at the melter!',needHeat:'Needs Heated Blade or Nitro!',rescued:'Cars rescued',goal:'Clear the snow, free the cars, melt it for cash!',goal2:'Goal: clear the streets and free every car',frozen:'STORM FROZEN!',recharge:'Wait',again:'Play again',arctic:'You rule the Arctic Empire!',cars:'Cars',time:'Time',earned:'Money',lvl:'Lv',tier:'x',boss:'BLIZZARD BOSS! Beat the clock for the jackpot!',bossTag:'BOSS',timeUp:"TIME'S UP! Jackpot lost - finish the city!",tUp:'TIME UP',jackpot:'Boss jackpot',bossWin:'BOSS DEFEATED!',giftCash:'MYSTERY GIFT: CASH!',giftNit:'MYSTERY GIFT: FREE NITRO!',giftSpd:'MYSTERY GIFT: SUPER SPEED!',autoNit:'Free Nitro',superSpd:'Super Speed',vip:'VIP RESCUE x2!',daily:'Daily Rewards',streak:'Streak',claim:'Claim',claimed:'Claimed',missions:'Daily Missions',dailyGot:'Reward claimed!',freeUp:'Free upgrade',plow:'Plow tier',
+en:{shop:'Upgrades',cities:'Cities',cleared:'Cleared',tank:'Tank',nitro:'Nitro',max:'MAX',next:'Next city',close:'✕',combo:'RESCUE COMBO',bliz:'BLIZZARD INCOMING!',chest:'GOLDEN CHEST DROPPED!',chestOn:'GOLD MODE',done:'CITY CLEARED!',nextOpen:'Next city unlocked:',lockHint:'Clear city {n} to 100% to unlock this one',bonus:'Clear bonus',locked:'Locked',tankFull:'TANK FULL — unload at the melter!',needHeat:'Needs Heated Blade or Nitro!',rescued:'Cars rescued',goal:'Clear the snow, free the cars, melt it for cash!',goal2:'Goal: clear the streets and free every car',frozen:'STORM FROZEN!',recharge:'Wait',again:'Play again',arctic:'You rule the Arctic Empire!',cars:'Cars',time:'Time',earned:'Money',lvl:'Lv',tier:'x',boss:'BLIZZARD BOSS! Beat the clock for the jackpot!',bossTag:'BOSS',timeUp:"TIME'S UP! Jackpot lost - finish the city!",tUp:'TIME UP',jackpot:'Boss jackpot',bossWin:'BOSS DEFEATED!',giftCash:'MYSTERY GIFT: CASH!',giftNit:'MYSTERY GIFT: FREE NITRO!',giftSpd:'MYSTERY GIFT: SUPER SPEED!',autoNit:'Free Nitro',superSpd:'Super Speed',vip:'VIP RESCUE x2!',daily:'Daily Rewards',streak:'Streak',claim:'Claim',claimed:'Claimed',missions:'Daily Missions',dailyGot:'Reward claimed!',freeUp:'Free upgrade',plow:'Plow tier',
 ms:{rescue:n=>`Rescue ${n} cars`,gift:n=>`Open ${n} mystery gifts`,smash:n=>`Smash ${n} ice boulders`,earn:n=>`Earn $${fmt(n)}`,city:n=>`Clear ${n} ${n>1?'cities':'city'}`},
- up:{blade:['Blade Width','Wider plow clears more per pass'],tank:['Snow Tank','Carry more snow per trip'],engine:['Engine & Nitro','Faster, stronger, longer nitro'],heat:['Heated Blade','Melts solid ice boulders instantly'],melter:['Melter Speed','Unload snow into cash faster'],magnet:['Coin Magnet','Pull in coins, gems & rewards'],helper:['AI Helper Plow','A robot plow clears snow for you'],value:['Snow Value','+25% cash per snow unit'],freeze:['Storm Freeze','Stop the snowfall for 15s (tap ❄)'],gold:['Buried Gold','More gold & diamonds under snow']}},
-ar:{shop:'الترقيات',cities:'المدن',cleared:'تم تنظيف',tank:'الخزان',nitro:'نيترو',max:'أقصى',next:'المدينة التالية',close:'✕',combo:'كومبو الإنقاذ',bliz:'عاصفة ثلجية قادمة!',chest:'سقط صندوق ذهبي!',chestOn:'الوضع الذهبي',done:'تم تنظيف المدينة!',bonus:'مكافأة التنظيف',locked:'مقفلة',tankFull:'الخزان ممتلئ — فرّغه في محطة الصهر!',needHeat:'تحتاج شفرة حرارية أو نيترو!',rescued:'سيارات تم إنقاذها',goal:'اكشط الثلج، حرّر السيارات، وصهره لتربح!',goal2:'الهدف: نظّف الشوارع وحرّر كل السيارات',frozen:'تم تجميد العاصفة!',recharge:'انتظر',again:'العب مجدداً',arctic:'أنت تحكم إمبراطورية القطب!',cars:'السيارات',time:'الوقت',earned:'المال',lvl:'م',tier:'x',boss:'زعيم العاصفة! اهزم الوقت واربح الجائزة الكبرى!',bossTag:'زعيم',timeUp:'انتهى الوقت! ضاعت الجائزة - أكمل المدينة!',tUp:'انتهى الوقت',jackpot:'جائزة الزعيم',bossWin:'تم هزيمة الزعيم!',giftCash:'هدية غامضة: مال!',giftNit:'هدية غامضة: نيترو مجاني!',giftSpd:'هدية غامضة: سرعة خارقة!',autoNit:'نيترو مجاني',superSpd:'سرعة خارقة',vip:'إنقاذ مميز x2!',daily:'المكافآت اليومية',streak:'أيام متتالية',claim:'استلم',claimed:'تم الاستلام',missions:'المهام اليومية',dailyGot:'تم استلام المكافأة!',freeUp:'ترقية مجانية',plow:'مستوى الكاسحة',
+ up:{blade:['Blade Width','Wider plow clears more per pass'],tank:['Snow Tank','Carry more snow per trip'],engine:['Engine & Nitro','Faster, stronger, longer nitro'],heat:['Heated Blade','Melts solid ice boulders instantly'],melter:['Melter Speed','Unload snow into cash faster'],magnet:['Coin Magnet','Pull in coins, gems & rewards'],helper:['Robot Helper Plow','A robot plow clears snow for you'],value:['Snow Value','+25% cash per snow unit'],freeze:['Storm Freeze','Stop the snowfall for 15s (tap ❄)'],gold:['Buried Gold','More gold & diamonds under snow']}},
+ar:{shop:'الترقيات',cities:'المدن',cleared:'تم تنظيف',tank:'الخزان',nitro:'نيترو',max:'أقصى',next:'المدينة التالية',close:'✕',combo:'كومبو الإنقاذ',bliz:'عاصفة ثلجية قادمة!',chest:'سقط صندوق ذهبي!',chestOn:'الوضع الذهبي',done:'تم تنظيف المدينة!',nextOpen:'تم فتح المدينة التالية:',lockHint:'نظّف مدينة {n} بنسبة 100% لتفتح هذه المدينة',bonus:'مكافأة التنظيف',locked:'مقفلة',tankFull:'الخزان ممتلئ — فرّغه في محطة الصهر!',needHeat:'تحتاج شفرة حرارية أو نيترو!',rescued:'سيارات تم إنقاذها',goal:'اكشط الثلج، حرّر السيارات، وصهره لتربح!',goal2:'الهدف: نظّف الشوارع وحرّر كل السيارات',frozen:'تم تجميد العاصفة!',recharge:'انتظر',again:'العب مجدداً',arctic:'أنت تحكم إمبراطورية القطب!',cars:'السيارات',time:'الوقت',earned:'المال',lvl:'م',tier:'x',boss:'زعيم العاصفة! اهزم الوقت واربح الجائزة الكبرى!',bossTag:'زعيم',timeUp:'انتهى الوقت! ضاعت الجائزة - أكمل المدينة!',tUp:'انتهى الوقت',jackpot:'جائزة الزعيم',bossWin:'تم هزيمة الزعيم!',giftCash:'هدية غامضة: مال!',giftNit:'هدية غامضة: نيترو مجاني!',giftSpd:'هدية غامضة: سرعة خارقة!',autoNit:'نيترو مجاني',superSpd:'سرعة خارقة',vip:'إنقاذ مميز x2!',daily:'المكافآت اليومية',streak:'أيام متتالية',claim:'استلم',claimed:'تم الاستلام',missions:'المهام اليومية',dailyGot:'تم استلام المكافأة!',freeUp:'ترقية مجانية',plow:'مستوى الكاسحة',
 ms:{rescue:n=>`أنقذ ${n} سيارات`,gift:n=>`افتح ${n} هدايا غامضة`,smash:n=>`حطّم ${n} صخور جليدية`,earn:n=>`اكسب $${fmt(n)}`,city:n=>`نظّف ${n} ${n>1?'مدن':'مدينة'}`},
  up:{blade:['عرض الشفرة','جرافة أعرض تكشط أكثر في كل مرور'],tank:['سعة الخزان','احمل ثلجاً أكثر في كل رحلة'],engine:['المحرك والنيترو','سرعة وقوة ونيترو أطول'],heat:['الشفرة الحرارية','تذيب الصخور الجليدية فوراً'],melter:['سرعة الصهر','حوّل الثلج إلى مال أسرع'],magnet:['مغناطيس العملات','اجذب العملات والألماس والمكافآت'],helper:['كاسحة آلية مساعدة','كاسحة ذكية تنظف الثلج لك'],value:['قيمة الثلج','+25% مال لكل وحدة ثلج'],freeze:['تجميد العاصفة','أوقف تساقط الثلج 15 ثانية (اضغط ❄)'],gold:['الذهب المدفون','ذهب وألماس أكثر تحت الثلج']}}};
 
@@ -329,7 +332,15 @@ function mkTree(light){
 }
 const treeCs=[mkTree(0),mkTree(1),mkTree(2)];
 
-const snow=new Uint8Array(GX*GY),roadM=new Uint8Array(GX*GY);
+let snow=new Uint8Array(GX*GY),roadM=new Uint8Array(GX*GY);
+function setMap(i){
+ const q=mulberry(i*7919+3);PX=560+10*Math.floor(q()*7);PY=380+10*Math.floor(q()*5);RW=170+10*Math.floor(q()*5);
+ [MC,MR]=mapDims(i);WW=MC*PX;WH=MR*PY;GX=Math.ceil(WW/CS);GY=Math.ceil(WH/CS);
+ MEL.x=PX+RW/2;MEL.y=PY+RW/2;
+ BLK=[];for(let j=0;j<MR;j++)for(let k=0;k<MC;k++)BLK.push({x:k*PX+RW,y:j*PY+RW,w:PX-RW,h:PY-RW});
+ base.width=snowC.width=WW;base.height=snowC.height=WH;
+ snow=new Uint8Array(GX*GY);roadM=new Uint8Array(GX*GY);
+}
 const paintCell=(ci,cj)=>sg.drawImage(texC,(ci*CS)%TS,(cj*CS)%TS,CS,CS,ci*CS,cj*CS,CS,CS);
 
 /* ================= state ================= */
@@ -376,22 +387,23 @@ function grade(hex,mode){
  if(mode===1){r+=(255-r)*.22;g+=(150-g)*.22;b+=(80-b)*.22}
  r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;let h=0,sa=0,l=(mx+mn)/2;
  if(d){sa=l>.5?d/(2-mx-mn):d/(mx+mn);h=mx===r?(g-b)/d+(g<b?6:0):mx===g?(b-r)/d+2:(r-g)/d+4;h*=60}
+ h=(h+HUE+360)%360;
  if(mode===0){sa=Math.min(1,sa*1.5+.1);l=Math.min(.78,l+.07)}
  else if(mode===1){sa=Math.min(1,sa*1.3+.05);l=Math.min(.75,l+.02)}
  else{sa=Math.min(1,sa*1.4+.15);l=l*.72}
  return `hsl(${h|0},${(sa*100)|0}%,${(l*100)|0}%)`;
 }
 function buildBase(){
- const th=TH[city.theme],r=mulberry(city.i*977+13),g=bg,lt=city.light;city.gr=grade(th.gr,lt);city.rd=grade(th.road,lt);
+ HUE=((city.i*47)%70)-35;const th=TH[city.theme],r=mulberry(city.i*977+13),g=bg,lt=city.light;city.gr=grade(th.gr,lt);city.rd=grade(th.road,lt);
  g.clearRect(0,0,WW,WH);g.fillStyle=city.gr;g.fillRect(0,0,WW,WH);
- g.fillStyle=city.rd;for(let i=0;i<3;i++)g.fillRect(i*600,0,190,WH);for(let j=0;j<3;j++)g.fillRect(0,j*400,WW,190);
+ g.fillStyle=city.rd;for(let i=0;i<MC;i++)g.fillRect(i*PX,0,RW,WH);for(let j=0;j<MR;j++)g.fillRect(0,j*PY,WW,RW);
  // lane markings
  g.fillStyle=lt===2?'rgba(90,240,255,.8)':lt===1?'rgba(255,232,160,.65)':'rgba(255,214,70,.65)';
- for(let i=0;i<3;i++)for(let y=10;y<WH;y+=44){if(y%400<200)continue;g.fillRect(i*600+93,y,4,24)}
- for(let j=0;j<3;j++)for(let x=10;x<WW;x+=44){if(x%600<200)continue;g.fillRect(x,j*400+93,24,4)}
+ for(let i=0;i<MC;i++)for(let y=10;y<WH;y+=44){if(y%PY<RW+10)continue;g.fillRect(i*PX+RW/2-2,y,4,24)}
+ for(let j=0;j<MR;j++)for(let x=10;x<WW;x+=44){if(x%PX<RW+10)continue;g.fillRect(x,j*PY+RW/2-2,24,4)}
  // crosswalks
  g.fillStyle='rgba(235,240,248,.35)';
- for(let i=0;i<3;i++)for(let j=0;j<3;j++){const x=i*600,y=j*400;for(let k=8;k<182;k+=18){g.fillRect(x+k,y+192,10,14);g.fillRect(x+k,y-14>0?y-14:0,10,y>0?10:0)}}
+ for(let i=0;i<MC;i++)for(let j=0;j<MR;j++){const x=i*PX,y=j*PY;for(let k=8;k<RW-8;k+=18){g.fillRect(x+k,y+RW+2,10,14);g.fillRect(x+k,y-14>0?y-14:0,10,y>0?10:0)}}
  // blocks
  BLK.forEach((b,bi)=>{
   g.fillStyle=['#5f6a78','#6c5b66','#272b3f'][lt];g.fillRect(b.x-14,b.y-14,b.w+28,b.h+28);
@@ -435,8 +447,8 @@ function buildSnow(){
 function roadSpot(minD,list){
  for(let n=0;n<80;n++){
   let x,y,a;
-  if(rnd()<.5){x=Math.floor(rnd()*3)*600+95+(rnd()-.5)*90;y=70+rnd()*(WH-140);a=rnd()<.5?PI/2:-PI/2}
-  else{y=Math.floor(rnd()*3)*400+95+(rnd()-.5)*90;x=70+rnd()*(WW-140);a=rnd()<.5?0:PI}
+  if(rnd()<.5){x=Math.floor(rnd()*MC)*PX+RW/2+(rnd()-.5)*(RW-100);y=70+rnd()*(WH-140);a=rnd()<.5?PI/2:-PI/2}
+  else{y=Math.floor(rnd()*MR)*PY+RW/2+(rnd()-.5)*(RW-100);x=70+rnd()*(WW-140);a=rnd()<.5?0:PI}
   if(Math.hypot(x-MEL.x,y-MEL.y)<190||Math.hypot(x-T.x,y-T.y)<minD+60)continue;
   let ok=true;for(const e of list){if(Math.hypot(x-e.x,y-e.y)<minD){ok=false;break}}
   if(ok)return{x,y,a}
@@ -447,13 +459,12 @@ function mkCar(x,y,a,type){const d=CT[type];return{x,y,a,type,col:d[2][Math.floo
 function spawnEntities(){
  cars=[];boulders=[];treas=[];gifts=[];picks=[];parts=[];texts=[];chest=null;
  const th=TH[city.theme],num=city.i+1;
- const n=num<=5?3:num<=15?6:num<=29?8:num<60?10:num<85?11:12;
+ const n=Math.min(20,(num<=5?3:num<=15?6:num<=29?8:num<60?10:num<85?11:12)+Math.floor((MC*MR-9)/3)+(num>3?Math.floor(rnd()*3):0));
  let base=th.cars;if(num<=5){base=th.cars.filter(t=>t==='sport'||t==='suv'||t==='taxi');if(!base.length)base=['suv','sport']}
  const specials=['police','ambulance','school'],pool=base.slice();
  if(num>=16)pool.push('ambulance','school');if(num>=30)pool.push('ambulance','school','police');
- cars.push(mkCar(665,800,PI/2,base[0]),mkCar(735,935,-PI/2,base[1%base.length]));
- const md=n>8?130:170;
- for(let k=2;k<n;k++){const p=roadSpot(md,cars);const type=(num>=16&&k<5)?specials[k-2]:pool[Math.floor(rnd()*pool.length)];cars.push(mkCar(p.x,p.y,p.a,type))}
+  const md=n>8?130:170;
+ for(let k=0;k<n;k++){const p=roadSpot(md,cars);const type=k<2?base[k%base.length]:(num>=16&&k<5)?specials[k-2]:pool[Math.floor(rnd()*pool.length)];cars.push(mkCar(p.x,p.y,p.a,type))}
  const nb=city.i<3?0:Math.min(12,1+Math.floor(city.i/6));
  for(let k=0;k<nb;k++){const p=roadSpot(150,cars.concat(boulders));const rad=30+rnd()*16,pts=[];for(let q=0;q<9;q++)pts.push(.82+rnd()*.3);boulders.push({x:p.x,y:p.y,r:rad,pts,hard:city.hard,ph:rnd()*6})}
  const nt=Math.min(40,Math.round(5*(1+.6*LE('gold'))));
@@ -462,16 +473,16 @@ function spawnEntities(){
  for(let k=0;k<ng;k++){const p=roadSpot(90,cars.concat(boulders,treas,gifts));gifts.push({x:p.x,y:p.y,ph:rnd()*6})}
 }
 function startCity(i){
- i=clamp(i|0,0,NC-1);S.city=i;
- const light=Math.floor(i/10)%3,boss=(i+1)%10===0;
- city={i,name:CN[i],cc:CC[i],theme:CTH[i],mult:cmult(i),dens:1+Math.floor(i/50)*.15,pack:Math.floor(i/50),light,night:light===2,boss,hard:Math.min(MAXL,(i<30?1:i<60?2:i<85?3:4)+Math.max(0,Math.floor(i/50)-1)),goal:Math.min(.8,.45+i*.008),bossTime:240-Math.min(54,Math.floor(i/10)*6),bossRate:14+i*.25,gr:'#2b2e35',rd:'#3a3d45'};
+ i=clamp(i|0,0,NC-1);S.city=i;setMap(i);
+ const light=i%3,boss=(i+1)%10===0;
+ city={i,name:CN[i],cc:CC[i],theme:CTH[i],mult:cmult(i),dens:1+Math.floor(i/50)*.15,pack:Math.floor(i/50),light,night:light===2,boss,hard:Math.min(MAXL,(i<30?1:i<60?2:i<85?3:4)+Math.max(0,Math.floor(i/50)-1)),goal:Math.min(.8,.45+i*.008),bossTime:240-Math.min(54,Math.floor(i/10)*6)+(mapDims(i)[0]*mapDims(i)[1]-9)*6,bossRate:14+i*.25,gr:'#2b2e35',rd:'#3a3d45'};
  R={t:0,nitro:100,tank:0,combo:0,comboT:0,chestT:0,freezeT:0,freezeCd:0,blizT:boss?25:city.i<3?1e9:Math.max(70,125-city.i),blizOn:0,coinAcc:0,coinT:0,done:false,snowLeft:0,roadCells:0,unload:0,unGain:0,unT:0,fly:[],streak:0,streakT:0,hitT:0,shake:0,rescued:0,carsTotal:0,earned:0,clrRate:0,doneT:0,helpAcc:0,helpT:0,tankFullShown:0,regenAcc:0,autoNitT:0,speedT:0,bossT:boss?city.bossTime:0,bossFail:false,jack:0,_le:0};
- T={x:695,y:650,a:PI/2,v:0,gear:0,nit:false,trk:0,beac:0};
+ T={x:MEL.x,y:MEL.y+155,a:PI/2,v:0,gear:0,nit:false,trk:0,beac:0};
  spawnEntities();R.carsTotal=cars.length;
  buildTex(light);buildBase();buildSnow();
  HELP=null;if(L('helper')>0)spawnHelper();
  flakes=[];for(let k=0;k<140;k++)flakes.push({x:rnd(),y:rnd(),s:.4+rnd()*.9,d:rnd()*6});
- cam.x=T.x-W/zoom/2;cam.y=T.y-H/zoom/2;
+ setZoom();cam.x=T.x-W/zoom/2;cam.y=T.y-H/zoom/2;
  $('mDone').classList.remove('open');
  renderStatic();save();banner(boss?TX().boss:TX().goal,3000);
 }
@@ -742,7 +753,7 @@ function showDone(bonus){
  <div class="stat"><span>${t.time}</span><span>${mm}:${ss}</span></div>
  <div class="stat"><span>${t.earned}</span><span>$${fmt(R.earned)}</span></div>
  <div class="stat"><span>${t.bonus}</span><span>+$${fmt(bonus)}</span></div>${R.jack?`<div class="stat" style="color:#ffd23f"><span>👑 ${t.jackpot}</span><span>+$${fmt(R.jack)}</span></div>`:''}
- ${last?'<div class="dmsg">⏳ '+tt().unlockIn+' '+hms(nextUnlockMs())+'</div>':''}<div class="row"><button class="btn" id="dNext">${last?t.again:t.next}</button><button class="btn alt" id="dShop">${t.shop}</button></div>`;
+ ${!last?'<div class="dmsg" style="color:#8dffb0">🔓 '+t.nextOpen+' '+CN[city.i+1][S.lang==='ar'?1:0]+'</div>':''}${last?'<div class="dmsg">⏳ '+tt().unlockIn+' '+hms(nextUnlockMs())+'</div>':''}<div class="row"><button class="btn" id="dNext">${last?t.again:t.next}</button><button class="btn alt" id="dShop">${t.shop}</button></div>`;
  openModal('mDone');
  $('dNext').onclick=()=>{sClick();closeModals();startCity(last?city.i:city.i+1)};
  $('dShop').onclick=()=>{sClick();closeModals();openShop(true)};
@@ -956,7 +967,7 @@ let hudT=0;
 function updateHud(){
  const t=TX(),cap=tankCap(),pct=1-R.snowLeft/R.roadCells,goal=Math.min(100,pct/city.goal*100);
  $('mv').textContent=fmt(S.money);
- $('prog').firstElementChild.style.width=goal+'%';$('pt').textContent=`${t.cleared} ${Math.floor(pct*100)}% · 🚗 ${cars.filter(c=>c.st>0).length+R.rescued-cars.filter(c=>c.st>0).length}/${R.carsTotal}`;
+ $('prog').firstElementChild.style.width=goal+'%';$('pt').textContent=`${t.cleared} ${R.done?100:Math.min(99,Math.floor(goal))}% · 🚗 ${cars.filter(c=>c.st>0).length+R.rescued-cars.filter(c=>c.st>0).length}/${R.carsTotal}`;
  const tb=$('tankbar');tb.firstElementChild.style.width=R.tank/cap*100+'%';tb.lastElementChild.textContent=`${t.tank} ${Math.floor(R.tank)}/${cap}`;tb.classList.toggle('full',R.tank>=cap-.5);
  $('nitbar').firstElementChild.style.width=(R.chestT>0?100:R.nitro)+'%';$('nitbar').lastElementChild.textContent=t.nitro;
  const cb=$('chestbox');if(R.chestT>0){cb.style.display='block';cb.textContent='👑 '+t.chestOn+' '+Math.ceil(R.chestT)+'s'}else cb.style.display='none';
@@ -981,13 +992,13 @@ function openShop(){
  h+='</div>';$('pShop').innerHTML=h;openModal('mShop');
 }
 function openCities(){
- const t=TX();$('pCity').setAttribute('dir',S.lang==='ar'?'rtl':'ltr');
- let h=`<button class="x" id="ctX">${t.close}</button><h2>${t.cities}</h2><div class="dmsg">🔓 ${NC} · ⏳ ${tt().unlockIn} ${hms(nextUnlockMs())}</div><div class="cgrid pin">`;
- {const ar=S.lang==='ar',f=Math.min(S.maxCity|0,NC-1),pc=i=>`<button class="cb cur pinb" data-c="${i}"><b>${i+1}</b>${(i+1)%10===0?'👑 ':''}${CN[i][ar?1:0]}<small>x${cmult(i).toFixed(1)}</small></button>`;
+ const t=TX(),ar=S.lang==='ar';$('pCity').setAttribute('dir',S.lang==='ar'?'rtl':'ltr');
+ let h=`<button class="x" id="ctX">${t.close}</button><h2>${t.cities}</h2><div class="dmsg">🔓 ${NC} · ⏳ ${tt().unlockIn} ${hms(nextUnlockMs())}</div><div class="dmsg" id="cmsg" style="color:#ffd23f;min-height:18px"></div><div class="cgrid pin">`;
+ {const f=Math.min(S.maxCity|0,NC-1),pc=i=>`<button class="cb cur pinb" data-c="${i}"><b>${i+1}</b>${(i+1)%10===0?'👑 ':''}${CN[i][ar?1:0]}<small>x${cmult(i).toFixed(1)}</small></button>`;
   h+=`<div class="pinl">${ar?'مدينتك الحالية':'Your current city'}</div>`+pc(Math.min(S.city|0,NC-1));
   if(f!==(S.city|0))h+=`<div class="pinl">${ar?'آخر مدينة مفتوحة':'Latest unlocked'}</div>`+pc(f);}
  h+=`</div><div class="pinl">${ar?'كل المدن (من 1)':'All cities (from 1)'}</div><div class="cgrid">`;
- for(let i=0;i<NC;i++){const lock=i>S.maxCity;h+=`<button class="cb ${i===S.city?'cur':''} ${lock?'lock':''}" data-c="${i}" ${lock?'disabled':''}><b>${lock?'🔒':i+1}</b>${(i+1)%10===0?'👑 ':''}${CN[i][S.lang==='ar'?1:0]}<small>x${cmult(i).toFixed(1)}</small></button>`}
+ for(let i=0;i<NC;i++){const lock=i>S.maxCity;h+=`<button class="cb ${i===S.city?'cur':''} ${lock?'lock':''}" data-c="${i}" ${lock?'data-lock="1"':''}><b>${lock?'🔒':i+1}</b>${(i+1)%10===0?'👑 ':''}${CN[i][S.lang==='ar'?1:0]}<small>x${cmult(i).toFixed(1)}</small></button>`}
  h+='</div>';$('pCity').innerHTML=h;openModal('mCity');$('pCity').scrollTop=0;
 }
 $('pShop').addEventListener('click',e=>{
@@ -1001,7 +1012,9 @@ $('pShop').addEventListener('click',e=>{
 function openShopKeep(sc){openShop();$('pShop').scrollTop=sc}
 $('pCity').addEventListener('click',e=>{
  if(e.target.id==='ctX'){closeModals();return}
- const b=e.target.closest('button[data-c]');if(!b)return;sClick();closeModals();startCity(+b.dataset.c);
+ const b=e.target.closest('button[data-c]');if(!b)return;
+ if(b.dataset.lock){const m=$('cmsg');if(m)m.textContent='🔒 '+TX().lockHint.replace('{n}',(S.maxCity|0)+1);return}
+ sClick();closeModals();startCity(+b.dataset.c);
 });
 $('bShop').onclick=()=>{sClick();openShop()};
 $('bCity').onclick=()=>{sClick();openCities()};
@@ -1116,11 +1129,20 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden){if(AU.c)AU
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('pointerdown',e=>{if(e.target===m&&m.id!=='mDone')closeModals()}));
 
 /* ================= loop ================= */
+function setZoom(){
+ const z=H>W?clamp(W/520,.62,1.1):clamp(Math.min(W/900,H/520),.55,1.25);
+ const tier=city?Math.floor(city.i/5):0;
+ zoom=Math.max(.34,z*Math.max(.55,1-tier*.05));   /* camera pulls back a bit every 5 cities */
+}
 function resize(){
  W=innerWidth;H=innerHeight;dpr=Math.min(devicePixelRatio||1,2)*Q;cv.width=Math.floor(W*dpr);cv.height=Math.floor(H*dpr);cv.style.width=W+'px';cv.style.height=H+'px';
- zoom=H>W?clamp(W/520,.62,1.1):clamp(Math.min(W/900,H/520),.55,1.25);if(city)renderStatic();
+ setZoom();if(city)renderStatic();
 }
 addEventListener('resize',resize);
+function refit(){resize();setTimeout(resize,150);setTimeout(resize,450)}
+addEventListener('orientationchange',refit);
+if(window.visualViewport)visualViewport.addEventListener('resize',resize);
+try{if(screen.orientation&&screen.orientation.unlock)screen.orientation.unlock()}catch(e){}
 let saveT=0,hudAcc=0,doneAcc=0;
 function frame(now){
  requestAnimationFrame(frame);
