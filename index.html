@@ -8,12 +8,13 @@
 :root{--navy:#0a1626;--ice:#d6ecff;--or:#ff8a1f;--yl:#ffd23f;--cy:#56d8ff;--glass:rgba(10,22,38,.72)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
 html,body{margin:0;height:100%;overflow:hidden;background:#0a1626;color:var(--ice);font-family:'Trebuchet MS','Segoe UI',Tahoma,Arial,sans-serif;touch-action:none}
+#stage{position:fixed;left:0;top:0;width:100%;height:100%;overflow:hidden}
 canvas#c{position:fixed;inset:0;display:block}
 #hud{position:fixed;inset:0;pointer-events:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 #hud *{pointer-events:none}
 #hud button,#hud #joyzone{pointer-events:auto}
 .chip{background:var(--glass);border:2px solid rgba(214,236,255,.25);border-radius:14px;padding:6px 12px;backdrop-filter:blur(4px)}
-#tl{position:absolute;left:max(8px,env(safe-area-inset-left));top:8px;display:flex;flex-direction:column;gap:5px;width:min(210px,46vw)}
+#tl{position:absolute;left:max(8px,env(safe-area-inset-left));top:8px;display:flex;flex-direction:column;gap:5px;width:min(210px,calc(var(--sw,1vw)*46))}
 #money{width:fit-content}
 #money{font:900 24px Impact,'Arial Black',sans-serif;color:var(--yl);letter-spacing:.5px;display:flex;gap:6px;align-items:center;transition:transform .12s}
 #money.pop{transform:scale(1.12)}
@@ -36,13 +37,13 @@ canvas#c{position:fixed;inset:0;display:block}
 .nit i{background:linear-gradient(90deg,#2d7bff,#6ff2ff)}
 @keyframes fl{to{filter:brightness(1.5)}}
 #chestbox{position:absolute;right:8px;top:54px;font:900 13px Impact,'Arial Black',sans-serif;color:#2a1b00;background:linear-gradient(#ffe27a,#ffb41f);border-radius:12px;padding:6px 14px;display:none;box-shadow:0 0 18px #ffc83a}
-#banner{position:absolute;left:50%;top:22%;transform:translate(-50%,0);font:900 clamp(22px,5vw,44px) Impact,'Arial Black',sans-serif;text-align:center;color:#fff;text-shadow:0 3px 0 #0a1626,0 0 22px var(--cy);opacity:0;white-space:nowrap}
+#banner{position:absolute;left:50%;top:22%;transform:translate(-50%,0);font:900 clamp(22px,calc(var(--sw,1vw)*5),44px) Impact,'Arial Black',sans-serif;text-align:center;color:#fff;text-shadow:0 3px 0 #0a1626,0 0 22px var(--cy);opacity:0;white-space:nowrap}
 #banner.show{animation:bn 2.4s ease-out forwards}
 @keyframes bn{0%{opacity:0;transform:translate(-50%,16px) scale(.8)}12%{opacity:1;transform:translate(-50%,0) scale(1.08)}20%{transform:translate(-50%,0) scale(1)}80%{opacity:1}100%{opacity:0}}
-#combo{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);font:900 clamp(26px,7vw,60px) Impact,'Arial Black',sans-serif;color:var(--yl);text-shadow:0 4px 0 #b34a00,0 0 26px #ff8a1f;opacity:0;white-space:nowrap;text-align:center}
+#combo{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);font:900 clamp(26px,calc(var(--sw,1vw)*7),60px) Impact,'Arial Black',sans-serif;color:var(--yl);text-shadow:0 4px 0 #b34a00,0 0 26px #ff8a1f;opacity:0;white-space:nowrap;text-align:center}
 #combo.show{animation:cb 1.5s ease-out forwards}
 @keyframes cb{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.25)}28%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-90%) scale(1)}}
-#hint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);font-weight:800;font-size:12px;max-width:calc(100vw - 210px);background:var(--glass);border-radius:12px;padding:6px 14px;display:none;text-align:center;max-width:80vw}
+#hint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);font-weight:800;font-size:12px;max-width:calc(var(--sw,1vw)*100 - 210px);background:var(--glass);border-radius:12px;padding:6px 14px;display:none;text-align:center;max-width:calc(var(--sw,1vw)*80)}
 #joyzone{position:absolute;left:0;top:14%;width:55%;bottom:0}
 #jbase{position:absolute;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:3px solid rgba(214,236,255,.45);background:rgba(214,236,255,.1);display:none}
 #jknob{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:radial-gradient(#fff,#9ccfff);box-shadow:0 0 14px #56d8ff}
@@ -53,7 +54,7 @@ canvas#c{position:fixed;inset:0;display:block}
 #bFreeze small{display:block;font-size:10px;line-height:10px}
 .modal{position:fixed;inset:0;background:rgba(4,10,20,.78);display:none;align-items:center;justify-content:center;z-index:5;padding:10px;touch-action:pan-y}
 .modal.open{display:flex}
-.panel{background:linear-gradient(#13263d,#0b1828);border:3px solid #3d6a94;border-radius:20px;max-width:760px;width:100%;max-height:94vh;overflow:auto;padding:16px 18px;position:relative;box-shadow:0 0 0 4px #091321,0 20px 60px #000}
+.panel{background:linear-gradient(#13263d,#0b1828);border:3px solid #3d6a94;border-radius:20px;max-width:760px;width:100%;max-height:calc(var(--sh,1vh)*94);overflow:auto;padding:16px 18px;position:relative;box-shadow:0 0 0 4px #091321,0 20px 60px #000}
 .panel h2{margin:0 0 6px;font:900 28px Impact,'Arial Black',sans-serif;color:var(--yl);letter-spacing:.5px}
 .panel .x{position:absolute;top:10px;right:12px;width:40px;height:40px;border-radius:12px;border:2px solid #3d6a94;background:#0b1828;color:var(--ice);font-size:20px;font-weight:900}
 .panel[dir=rtl] .x{right:auto;left:12px}
@@ -82,6 +83,9 @@ canvas#c{position:fixed;inset:0;display:block}
 @media (max-width:640px){#tr{right:6px;top:8px;gap:4px}#tr button{min-width:36px;height:36px;padding:0 6px;font-size:15px;border-radius:11px}#money{font-size:20px;padding:4px 10px}#cityname{font-size:11px;padding:4px 9px}#bNitro{width:76px;height:76px;right:12px;bottom:14px;font-size:14px}#bFreeze{right:21px;bottom:100px;width:54px;height:54px}}
 @media (max-height:520px){#bNitro{width:80px;height:80px;bottom:10px}#bFreeze{bottom:100px;width:56px;height:56px}#bars{bottom:6px}.panel{padding:10px 14px}}
 @media (orientation:landscape) and (max-height:520px){#joyzone{top:10%;width:46%}#tl{width:min(230px,30vw)}.panel{max-height:92vh;overflow:auto}}
+#stage.rot{transform-origin:0 0}
+#stage.rot #hud{padding:0}
+#stage.rotL #bNitro{width:80px;height:80px;bottom:10px}#stage.rotL #bFreeze{bottom:100px;width:56px;height:56px}#stage.rotL #bars{bottom:6px}#stage.rotL .panel{padding:10px 14px}#stage.rotL #joyzone{top:10%;width:46%}#stage.rotL #tl{width:min(230px,calc(var(--sw,1vw)*30))}
 #tr button{position:relative}
 #bossbox{display:none;width:fit-content;font:900 14px Impact,'Arial Black',sans-serif;color:#ffd6d6;border-color:rgba(255,90,90,.65);background:rgba(70,8,18,.82)}
 #bossbox.warn{animation:fl .4s infinite alternate;color:#fff}
@@ -142,6 +146,7 @@ canvas#c{position:fixed;inset:0;display:block}
 </style>
 </head>
 <body>
+<div id="stage">
 <canvas id="c"></canvas>
 <div id="hud">
   <div id="tl">
@@ -159,6 +164,7 @@ canvas#c{position:fixed;inset:0;display:block}
     <button id="bShop" class="main"></button>
     <button id="bCity"></button>
     <button id="bDaily">📅</button>
+    <button id="bRot" title="Rotate">🔄</button>
     <button id="bLang">ع</button>
     <button id="bSnd">🔊</button>
   </div>
@@ -176,6 +182,7 @@ canvas#c{position:fixed;inset:0;display:block}
 <div class="modal" id="mDone"><div class="panel" id="pDone"></div></div>
 <div class="modal" id="mTour"><div class="panel" id="pTour"></div></div>
 <div class="modal" id="mDaily"><div class="panel" id="pDaily"></div></div>
+</div>
 
 <script>
 (()=>{
@@ -281,10 +288,10 @@ const UP=[
  {id:'helper',ic:'🚜',base:400,g:1.7},{id:'value',ic:'💲',base:120,g:1.6},{id:'freeze',ic:'❄️',base:250,g:1.6},{id:'gold',ic:'💎',base:200,g:1.6}];
 const MAXL=20; /* max upgrade level (was 10) */
 const I18={
-en:{shop:'Upgrades',cities:'Cities',cleared:'Cleared',tank:'Tank',nitro:'Nitro',max:'MAX',next:'Next city',close:'✕',combo:'RESCUE COMBO',bliz:'BLIZZARD INCOMING!',chest:'GOLDEN CHEST DROPPED!',chestOn:'GOLD MODE',done:'CITY CLEARED!',nextOpen:'Next city unlocked:',lockHint:'Clear city {n} to 100% to unlock this one',bonus:'Clear bonus',locked:'Locked',tankFull:'TANK FULL — unload at the melter!',needHeat:'Needs Heated Blade or Nitro!',rescued:'Cars rescued',goal:'Clear the snow, free the cars, melt it for cash!',goal2:'Goal: clear the streets and free every car',frozen:'STORM FROZEN!',recharge:'Wait',again:'Play again',arctic:'You rule the Arctic Empire!',cars:'Cars',time:'Time',earned:'Money',lvl:'Lv',tier:'x',boss:'BLIZZARD BOSS! Beat the clock for the jackpot!',bossTag:'BOSS',timeUp:"TIME'S UP! Jackpot lost - finish the city!",tUp:'TIME UP',jackpot:'Boss jackpot',bossWin:'BOSS DEFEATED!',giftCash:'MYSTERY GIFT: CASH!',giftNit:'MYSTERY GIFT: FREE NITRO!',giftSpd:'MYSTERY GIFT: SUPER SPEED!',autoNit:'Free Nitro',superSpd:'Super Speed',vip:'VIP RESCUE x2!',daily:'Daily Rewards',streak:'Streak',claim:'Claim',claimed:'Claimed',missions:'Daily Missions',dailyGot:'Reward claimed!',freeUp:'Free upgrade',plow:'Plow tier',
+en:{shop:'Upgrades',cities:'Cities',cleared:'Cleared',tank:'Tank',nitro:'Nitro',max:'MAX',next:'Next city',close:'✕',combo:'RESCUE COMBO',bliz:'BLIZZARD INCOMING!',chest:'GOLDEN CHEST DROPPED!',chestOn:'GOLD MODE',done:'CITY CLEARED!',rotA:'AUTO ROTATE',rotL:'LANDSCAPE',rotP:'PORTRAIT',nextOpen:'Next city unlocked:',lockHint:'Clear city {n} to 100% to unlock this one',bonus:'Clear bonus',locked:'Locked',tankFull:'TANK FULL — unload at the melter!',needHeat:'Needs Heated Blade or Nitro!',rescued:'Cars rescued',goal:'Clear the snow, free the cars, melt it for cash!',goal2:'Goal: clear the streets and free every car',frozen:'STORM FROZEN!',recharge:'Wait',again:'Play again',arctic:'You rule the Arctic Empire!',cars:'Cars',time:'Time',earned:'Money',lvl:'Lv',tier:'x',boss:'BLIZZARD BOSS! Beat the clock for the jackpot!',bossTag:'BOSS',timeUp:"TIME'S UP! Jackpot lost - finish the city!",tUp:'TIME UP',jackpot:'Boss jackpot',bossWin:'BOSS DEFEATED!',giftCash:'MYSTERY GIFT: CASH!',giftNit:'MYSTERY GIFT: FREE NITRO!',giftSpd:'MYSTERY GIFT: SUPER SPEED!',autoNit:'Free Nitro',superSpd:'Super Speed',vip:'VIP RESCUE x2!',daily:'Daily Rewards',streak:'Streak',claim:'Claim',claimed:'Claimed',missions:'Daily Missions',dailyGot:'Reward claimed!',freeUp:'Free upgrade',plow:'Plow tier',
 ms:{rescue:n=>`Rescue ${n} cars`,gift:n=>`Open ${n} mystery gifts`,smash:n=>`Smash ${n} ice boulders`,earn:n=>`Earn $${fmt(n)}`,city:n=>`Clear ${n} ${n>1?'cities':'city'}`},
  up:{blade:['Blade Width','Wider plow clears more per pass'],tank:['Snow Tank','Carry more snow per trip'],engine:['Engine & Nitro','Faster, stronger, longer nitro'],heat:['Heated Blade','Melts solid ice boulders instantly'],melter:['Melter Speed','Unload snow into cash faster'],magnet:['Coin Magnet','Pull in coins, gems & rewards'],helper:['Robot Helper Plow','A robot plow clears snow for you'],value:['Snow Value','+25% cash per snow unit'],freeze:['Storm Freeze','Stop the snowfall for 15s (tap ❄)'],gold:['Buried Gold','More gold & diamonds under snow']}},
-ar:{shop:'الترقيات',cities:'المدن',cleared:'تم تنظيف',tank:'الخزان',nitro:'نيترو',max:'أقصى',next:'المدينة التالية',close:'✕',combo:'كومبو الإنقاذ',bliz:'عاصفة ثلجية قادمة!',chest:'سقط صندوق ذهبي!',chestOn:'الوضع الذهبي',done:'تم تنظيف المدينة!',nextOpen:'تم فتح المدينة التالية:',lockHint:'نظّف مدينة {n} بنسبة 100% لتفتح هذه المدينة',bonus:'مكافأة التنظيف',locked:'مقفلة',tankFull:'الخزان ممتلئ — فرّغه في محطة الصهر!',needHeat:'تحتاج شفرة حرارية أو نيترو!',rescued:'سيارات تم إنقاذها',goal:'اكشط الثلج، حرّر السيارات، وصهره لتربح!',goal2:'الهدف: نظّف الشوارع وحرّر كل السيارات',frozen:'تم تجميد العاصفة!',recharge:'انتظر',again:'العب مجدداً',arctic:'أنت تحكم إمبراطورية القطب!',cars:'السيارات',time:'الوقت',earned:'المال',lvl:'م',tier:'x',boss:'زعيم العاصفة! اهزم الوقت واربح الجائزة الكبرى!',bossTag:'زعيم',timeUp:'انتهى الوقت! ضاعت الجائزة - أكمل المدينة!',tUp:'انتهى الوقت',jackpot:'جائزة الزعيم',bossWin:'تم هزيمة الزعيم!',giftCash:'هدية غامضة: مال!',giftNit:'هدية غامضة: نيترو مجاني!',giftSpd:'هدية غامضة: سرعة خارقة!',autoNit:'نيترو مجاني',superSpd:'سرعة خارقة',vip:'إنقاذ مميز x2!',daily:'المكافآت اليومية',streak:'أيام متتالية',claim:'استلم',claimed:'تم الاستلام',missions:'المهام اليومية',dailyGot:'تم استلام المكافأة!',freeUp:'ترقية مجانية',plow:'مستوى الكاسحة',
+ar:{shop:'الترقيات',cities:'المدن',cleared:'تم تنظيف',tank:'الخزان',nitro:'نيترو',max:'أقصى',next:'المدينة التالية',close:'✕',combo:'كومبو الإنقاذ',bliz:'عاصفة ثلجية قادمة!',chest:'سقط صندوق ذهبي!',chestOn:'الوضع الذهبي',done:'تم تنظيف المدينة!',rotA:'تدوير تلقائي',rotL:'بالعرض',rotP:'بالطول',nextOpen:'تم فتح المدينة التالية:',lockHint:'نظّف مدينة {n} بنسبة 100% لتفتح هذه المدينة',bonus:'مكافأة التنظيف',locked:'مقفلة',tankFull:'الخزان ممتلئ — فرّغه في محطة الصهر!',needHeat:'تحتاج شفرة حرارية أو نيترو!',rescued:'سيارات تم إنقاذها',goal:'اكشط الثلج، حرّر السيارات، وصهره لتربح!',goal2:'الهدف: نظّف الشوارع وحرّر كل السيارات',frozen:'تم تجميد العاصفة!',recharge:'انتظر',again:'العب مجدداً',arctic:'أنت تحكم إمبراطورية القطب!',cars:'السيارات',time:'الوقت',earned:'المال',lvl:'م',tier:'x',boss:'زعيم العاصفة! اهزم الوقت واربح الجائزة الكبرى!',bossTag:'زعيم',timeUp:'انتهى الوقت! ضاعت الجائزة - أكمل المدينة!',tUp:'انتهى الوقت',jackpot:'جائزة الزعيم',bossWin:'تم هزيمة الزعيم!',giftCash:'هدية غامضة: مال!',giftNit:'هدية غامضة: نيترو مجاني!',giftSpd:'هدية غامضة: سرعة خارقة!',autoNit:'نيترو مجاني',superSpd:'سرعة خارقة',vip:'إنقاذ مميز x2!',daily:'المكافآت اليومية',streak:'أيام متتالية',claim:'استلم',claimed:'تم الاستلام',missions:'المهام اليومية',dailyGot:'تم استلام المكافأة!',freeUp:'ترقية مجانية',plow:'مستوى الكاسحة',
 ms:{rescue:n=>`أنقذ ${n} سيارات`,gift:n=>`افتح ${n} هدايا غامضة`,smash:n=>`حطّم ${n} صخور جليدية`,earn:n=>`اكسب $${fmt(n)}`,city:n=>`نظّف ${n} ${n>1?'مدن':'مدينة'}`},
  up:{blade:['عرض الشفرة','جرافة أعرض تكشط أكثر في كل مرور'],tank:['سعة الخزان','احمل ثلجاً أكثر في كل رحلة'],engine:['المحرك والنيترو','سرعة وقوة ونيترو أطول'],heat:['الشفرة الحرارية','تذيب الصخور الجليدية فوراً'],melter:['سرعة الصهر','حوّل الثلج إلى مال أسرع'],magnet:['مغناطيس العملات','اجذب العملات والألماس والمكافآت'],helper:['كاسحة آلية مساعدة','كاسحة ذكية تنظف الثلج لك'],value:['قيمة الثلج','+25% مال لكل وحدة ثلج'],freeze:['تجميد العاصفة','أوقف تساقط الثلج 15 ثانية (اضغط ❄)'],gold:['الذهب المدفون','ذهب وألماس أكثر تحت الثلج']}}};
 
@@ -1116,11 +1123,14 @@ addEventListener('keydown',e=>{if(e.target&&e.target.tagName==='INPUT')return;au
 addEventListener('keyup',e=>{const k=keyMap[e.code];if(k)K[k]=0});
 addEventListener('blur',()=>{for(const k in K)K[k]=0});
 const jz=$('joyzone'),jb=$('jbase'),jk=$('jknob');
-jz.addEventListener('pointerdown',e=>{auInit();if(joy.on)return;e.preventDefault();joy.on=true;joy.id=e.pointerId;joy.bx=e.clientX;joy.by=e.clientY;joy.mag=0;jz.setPointerCapture(e.pointerId);
- const r=jz.getBoundingClientRect();jb.style.left=(e.clientX-r.left)+'px';jb.style.top=(e.clientY-r.top)+'px';jb.style.display='block';jk.style.transform='translate(0,0)'});
-jz.addEventListener('pointermove',e=>{if(!joy.on||e.pointerId!==joy.id)return;const dx=e.clientX-joy.bx,dy=e.clientY-joy.by,d=Math.hypot(dx,dy),m=60;joy.mag=Math.min(1,d/m);joy.ang=Math.atan2(dy,dx);const k=Math.min(d,m);jk.style.transform=`translate(${Math.cos(joy.ang)*k}px,${Math.sin(joy.ang)*k}px)`});
+jz.addEventListener('pointerdown',e=>{auInit();if(joy.on)return;e.preventDefault();joy.on=true;joy.id=e.pointerId;const p=pt(e);joy.bx=p.x;joy.by=p.y;joy.mag=0;jz.setPointerCapture(e.pointerId);
+ jb.style.left=(p.x-jz.offsetLeft)+'px';jb.style.top=(p.y-jz.offsetTop)+'px';jb.style.display='block';jk.style.transform='translate(0,0)'});
+jz.addEventListener('pointermove',e=>{if(!joy.on||e.pointerId!==joy.id)return;const p=pt(e),dx=p.x-joy.bx,dy=p.y-joy.by,d=Math.hypot(dx,dy),m=60;joy.mag=Math.min(1,d/m);joy.ang=Math.atan2(dy,dx);const k=Math.min(d,m);jk.style.transform=`translate(${Math.cos(joy.ang)*k}px,${Math.sin(joy.ang)*k}px)`});
 const joyEnd=e=>{if(e.pointerId!==joy.id)return;joy.on=false;joy.mag=0;jb.style.display='none'};
 jz.addEventListener('pointerup',joyEnd);jz.addEventListener('pointercancel',joyEnd);jz.addEventListener('lostpointercapture',joyEnd);
+const rotIcon=()=>{$('bRot').textContent=['🔄','↔️','↕️'][S.rot|0]};
+$('bRot').onclick=()=>{sClick();S.rot=((S.rot|0)+1)%3;save();resize();rotIcon();const t=TX();banner([t.rotA,t.rotL,t.rotP][S.rot],1600)};
+rotIcon();
 const nb=$('bNitro');
 nb.addEventListener('pointerdown',e=>{auInit();e.preventDefault();K.nitB=1;nb.classList.add('on');nb.setPointerCapture(e.pointerId)});
 const nEnd=()=>{K.nitB=0;nb.classList.remove('on')};nb.addEventListener('pointerup',nEnd);nb.addEventListener('pointercancel',nEnd);
@@ -1129,13 +1139,26 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden){if(AU.c)AU
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('pointerdown',e=>{if(e.target===m&&m.id!=='mDone')closeModals()}));
 
 /* ================= loop ================= */
+/* orientation: Auto follows the phone; Landscape / Portrait force the picture even if the host locks the screen */
+let ROT=false;
+function applyRot(){
+ const wp=innerHeight>innerWidth,want=(S.rot|0)===1?'L':(S.rot|0)===2?'P':'';
+ ROT=(want==='L'&&wp)||(want==='P'&&!wp);
+ const st=$('stage'),w=ROT?innerHeight:innerWidth,h=ROT?innerWidth:innerHeight;
+ st.style.width=w+'px';st.style.height=h+'px';
+ st.style.transform=ROT?'translateX('+innerWidth+'px) rotate(90deg)':'none';
+ st.style.setProperty('--sw',(w/100)+'px');st.style.setProperty('--sh',(h/100)+'px');
+ st.classList.toggle('rot',ROT);st.classList.toggle('rotL',ROT&&w>h);
+ W=w;H=h;
+}
+const pt=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};
 function setZoom(){
  const z=H>W?clamp(W/520,.62,1.1):clamp(Math.min(W/900,H/520),.55,1.25);
  const tier=city?Math.floor(city.i/5):0;
  zoom=Math.max(.34,z*Math.max(.55,1-tier*.05));   /* camera pulls back a bit every 5 cities */
 }
 function resize(){
- W=innerWidth;H=innerHeight;dpr=Math.min(devicePixelRatio||1,2)*Q;cv.width=Math.floor(W*dpr);cv.height=Math.floor(H*dpr);cv.style.width=W+'px';cv.style.height=H+'px';
+ applyRot();dpr=Math.min(devicePixelRatio||1,2)*Q;cv.width=Math.floor(W*dpr);cv.height=Math.floor(H*dpr);cv.style.width=W+'px';cv.style.height=H+'px';
  setZoom();if(city)renderStatic();
 }
 addEventListener('resize',resize);
